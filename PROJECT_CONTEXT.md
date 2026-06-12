@@ -17,12 +17,19 @@ Sistema de gestão de cestas básicas que transforma o controle de estoque em um
 - Banco: SQLite (desenvolvimento) / PostgreSQL (produção)
 - IA: Google Gemini API (`google-genai`) com fallback quando `GEMINI_API_KEY` não está configurada
 
+## Autenticação
+- Sistema protegido por JWT (SimpleJWT).
+- Usuário demo criado automaticamente: `admin` / `admin123`.
+- Telas privadas redirecionam para `/login` quando não autenticado.
+
 ## Como Executar
 
 ### Backend
 ```bash
 cd backend
 source .venv/Scripts/activate  # Windows Git Bash
+python manage.py migrate
+python manage.py criar_usuario_demo
 python manage.py runserver
 ```
 
@@ -53,6 +60,13 @@ python manage.py importar_planilha
 11. ✅ Dashboard — KPIs e top oportunidades
 
 ## Endpoints da API
+### Autenticação
+- `POST /api/auth/login` → tokens access/refresh
+- `POST /api/auth/refresh`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+
+### Módulos
 - `GET/POST /api/produtos/`
 - `GET/PUT/PATCH/DELETE /api/produtos/<id>/`
 - `GET /api/produtos/<id>/historico-precos/`
