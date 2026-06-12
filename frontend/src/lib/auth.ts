@@ -55,7 +55,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   if (!refresh) return null;
 
   try {
-    const res = await fetch(`${API_URL}/api/auth/refresh/`, {
+    const res = await fetch(`${API_URL}/api/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
@@ -106,7 +106,7 @@ export async function login(
   username: string,
   password: string
 ): Promise<Tokens> {
-  const res = await fetch(`${API_URL}/api/auth/login/`, {
+  const res = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -126,7 +126,7 @@ export async function logout(): Promise<void> {
   const refresh = getRefreshToken();
   if (refresh) {
     try {
-      await apiFetch("/api/auth/logout/", {
+      await apiFetch("/api/auth/logout", {
         method: "POST",
         body: JSON.stringify({ refresh }),
       });
@@ -142,7 +142,7 @@ export async function getCurrentUser(): Promise<User | null> {
   if (!token) return null;
 
   try {
-    const res = await apiFetch("/api/auth/me/");
+    const res = await apiFetch("/api/auth/me");
     if (!res.ok) return null;
     return await res.json();
   } catch {
