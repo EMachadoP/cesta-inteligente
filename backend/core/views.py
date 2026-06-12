@@ -6,8 +6,14 @@ from datetime import date
 from django.db import models
 from django.db.models import Avg, Count, Min
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 from core.models import Alerta, Compra, Fornecedor, Produto, Promocao, MontagemCesta, ItemCesta
 from core.serializers import (
@@ -209,3 +215,36 @@ class DashboardViewSet(viewsets.ViewSet):
             'promocoes_count': Promocao.objects.count(),
             'top_oportunidades': ranking_oportunidades(limite=5),
         })
+
+
+class LoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+
+
+class RefreshView(TokenRefreshView):
+    permission_classes = [AllowAny]
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    try:
+        refresh_token = request.data.get('refresh')
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        return Response({'detail': 'Logout realizado com sucesso.'})
+    except Exception as e:
+        return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def me_view(request):
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+    })

@@ -12,9 +12,13 @@ from core.views import (
     FornecedorViewSet,
     FormacaoCestaViewSet,
     InteligenciaViewSet,
+    LoginView,
     ProdutoViewSet,
     PromocaoViewSet,
+    RefreshView,
     SimuladorViewSet,
+    logout_view,
+    me_view,
 )
 
 router = DefaultRouter(trailing_slash=False)
@@ -31,4 +35,8 @@ router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('auth/login', LoginView.as_view(), name='login'),
+    path('auth/refresh', RefreshView.as_view(), name='refresh'),
+    path('auth/logout', logout_view, name='logout'),
+    path('auth/me', me_view, name='me'),
 ]
