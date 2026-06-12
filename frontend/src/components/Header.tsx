@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Package } from "lucide-react";
+import { Menu, Package, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +25,7 @@ const navItems = [
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
@@ -38,6 +40,24 @@ export function Header() {
         <h1 className="text-lg font-semibold">
           {navItems.find((i) => i.href === pathname)?.label || "Cesta Inteligente"}
         </h1>
+      </div>
+
+      <div className="flex items-center gap-3">
+        {user && (
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <User className="h-4 w-4" />
+            <span className="font-medium text-foreground">{user.username}</span>
+          </div>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={logout}
+          className="hidden md:flex"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Sair
+        </Button>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -72,6 +92,20 @@ export function Header() {
               );
             })}
           </nav>
+          <div className="border-t p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                <span className="font-medium text-foreground">
+                  {user?.username || "Usuário"}
+                </span>
+              </div>
+              <Button variant="outline" size="sm" onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </div>
+          </div>
         </SheetContent>
       </Sheet>
     </header>

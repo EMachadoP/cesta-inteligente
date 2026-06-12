@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/auth";
 import {
   Produto,
   Compra,
@@ -12,19 +13,8 @@ import {
   ApiError,
 } from "@/types";
 
-const API_BASE = "http://localhost:8000/api";
-
-export async function apiFetch<T = unknown>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const url = `${API_BASE}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
-
-  const response = await fetch(url, { ...options, headers });
+async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await apiFetch(path, options);
 
   if (!response.ok) {
     let errorData: ApiError = {};
@@ -53,16 +43,17 @@ export async function apiFetch<T = unknown>(
 
 // Dashboard
 export async function getDashboard(): Promise<DashboardResumo> {
-  return apiFetch<DashboardResumo>("/dashboard/resumo/");
+  return fetchJson<DashboardResumo>("/api/dashboard/resumo");
 }
 
 // Produtos
 export async function getProdutos(): Promise<Produto[]> {
-  return apiFetch<Produto[]>("/produtos/");
+  const data = await fetchJson<{ results: Produto[] }>("/api/produtos");
+  return data.results;
 }
 
 export async function createProduto(data: Partial<Produto>): Promise<Produto> {
-  return apiFetch<Produto>("/produtos/", {
+  return fetchJson<Produto>("/api/produtos", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -72,37 +63,40 @@ export async function updateProduto(
   id: number,
   data: Partial<Produto>
 ): Promise<Produto> {
-  return apiFetch<Produto>(`/produtos/${id}/`, {
+  return fetchJson<Produto>(`/api/produtos/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteProduto(id: number): Promise<void> {
-  return apiFetch<void>(`/produtos/${id}/`, { method: "DELETE" });
+  return fetchJson<void>(`/api/produtos/${id}`, { method: "DELETE" });
 }
 
 export async function getHistoricoPrecos(
   produtoId: number
 ): Promise<HistoricoPreco[]> {
-  return apiFetch<HistoricoPreco[]>(`/produtos/${produtoId}/historico-precos/`);
+  return fetchJson<HistoricoPreco[]>(
+    `/api/produtos/${produtoId}/historico-precos`
+  );
 }
 
 export async function getComparativoMarcas(
   produtoId: number
 ): Promise<ComparativoMarca[]> {
-  return apiFetch<ComparativoMarca[]>(
-    `/produtos/${produtoId}/comparativo-marcas/`
+  return fetchJson<ComparativoMarca[]>(
+    `/api/produtos/${produtoId}/comparativo-marcas`
   );
 }
 
 // Compras
 export async function getCompras(): Promise<Compra[]> {
-  return apiFetch<Compra[]>("/compras/");
+  const data = await fetchJson<{ results: Compra[] }>("/api/compras");
+  return data.results;
 }
 
 export async function createCompra(data: Partial<Compra>): Promise<Compra> {
-  return apiFetch<Compra>("/compras/", {
+  return fetchJson<Compra>("/api/compras", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -110,21 +104,42 @@ export async function createCompra(data: Partial<Compra>): Promise<Compra> {
 
 // Estoque
 export async function getEstoque(): Promise<EstoqueItem[]> {
-  return apiFetch<EstoqueItem[]>("/estoque/");
+  return fetchJson<EstoqueItem[]>("/api/estoque");
 }
 
 // Simulador
 export async function getSimulador(cestas: number): Promise<SimuladorResponse> {
-  return apiFetch<SimuladorResponse>(`/simulador/?cestas=${cestas}`);
+  const data = await fetchJson<
+    {
+      produto: string;
+      unidade: string;
+      quantidade_por_cesta: number;
+      necessario: number;
+      em_estoque: number;
+      falta_comprar: number;
+    }[]
+  >(`/api/simulador?cestas=${cestas}`);
+  return {
+    cestas,
+    itens: data.map((item) => ({
+      produto: item.produto,
+      unidade: item.unidade,
+      quantidade_por_cesta: item.quantidade_por_cesta,
+      necessario: item.necessario,
+      em_estoque: item.em_estoque,
+      faltara: item.falta_comprar,
+    })),
+  };
 }
 
 // Promoções
 export async function getPromocoes(): Promise<Promocao[]> {
-  return apiFetch<Promocao[]>("/promocoes/");
+  const data = await fetchJson<{ results: Promocao[] }>("/api/promocoes");
+  return data.results;
 }
 
 export async function createPromocao(data: Partial<Promocao>): Promise<Promocao> {
-  return apiFetch<Promocao>("/promocoes/", {
+  return fetchJson<Promocao>("/api/promocoes", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -132,13 +147,14 @@ export async function createPromocao(data: Partial<Promocao>): Promise<Promocao>
 
 // Fornecedores
 export async function getFornecedores(): Promise<Fornecedor[]> {
-  return apiFetch<Fornecedor[]>("/fornecedores/");
+  const data = await fetchJson<{ results: Fornecedor[] }>("/api/fornecedores");
+  return data.results;
 }
 
 export async function createFornecedor(
   data: Partial<Fornecedor>
 ): Promise<Fornecedor> {
-  return apiFetch<Fornecedor>("/fornecedores/", {
+  return fetchJson<Fornecedor>("/api/fornecedores", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -148,17 +164,17 @@ export async function updateFornecedor(
   id: number,
   data: Partial<Fornecedor>
 ): Promise<Fornecedor> {
-  return apiFetch<Fornecedor>(`/fornecedores/${id}/`, {
+  return fetchJson<Fornecedor>(`/api/fornecedores/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 }
 
 export async function deleteFornecedor(id: number): Promise<void> {
-  return apiFetch<void>(`/fornecedores/${id}/`, { method: "DELETE" });
+  return fetchJson<void>(`/api/fornecedores/${id}`, { method: "DELETE" });
 }
 
 // Inteligência
 export async function getOportunidades(): Promise<Oportunidade[]> {
-  return apiFetch<Oportunidade[]>("/inteligencia/oportunidades/");
+  return fetchJson<Oportunidade[]>("/api/inteligencia/oportunidades");
 }
