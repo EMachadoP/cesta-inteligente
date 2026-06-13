@@ -54,11 +54,17 @@ export default function ComprasPage() {
     }
   };
 
-  const produtoNome = (id: number) =>
-    produtos.find((p) => p.id === id)?.nome || `#${id}`;
+  const produtoNome = (produto?: number | Produto | null) => {
+    if (!produto) return "—";
+    if (typeof produto === "object") return produto.nome;
+    return produtos.find((p) => p.id === produto)?.nome || `#${produto}`;
+  };
 
-  const fornecedorNome = (id?: number | null) =>
-    fornecedores.find((f) => f.id === id)?.nome || "—";
+  const fornecedorNome = (fornecedor?: number | Fornecedor | null) => {
+    if (!fornecedor) return "—";
+    if (typeof fornecedor === "object") return fornecedor.nome;
+    return fornecedores.find((f) => f.id === fornecedor)?.nome || "—";
+  };
 
   const formatCurrency = (value?: string | number) => {
     const num = Number(value || 0);

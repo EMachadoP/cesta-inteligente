@@ -40,7 +40,9 @@ class ProdutoListSerializer(serializers.ModelSerializer):
         queryset=Categoria.objects.all(),
         source='categoria',
         write_only=True,
+        required=False,
     )
+    categoria_nome = serializers.CharField(write_only=True, required=False)
     status_estoque = serializers.CharField(read_only=True)
     preco_medio = serializers.SerializerMethodField()
     menor_preco = serializers.SerializerMethodField()
@@ -53,6 +55,7 @@ class ProdutoListSerializer(serializers.ModelSerializer):
             'nome',
             'categoria',
             'categoria_id',
+            'categoria_nome',
             'quantidade_por_cesta',
             'unidade',
             'marca_preferencial',
@@ -75,6 +78,21 @@ class ProdutoListSerializer(serializers.ModelSerializer):
 
     def get_consumo_mensal_medio(self, obj):
         return round(obj.consumo_mensal_medio(), 3)
+
+    def _resolve_categoria(self, validated_data):
+        categoria_nome = validated_data.pop('categoria_nome', None)
+        if categoria_nome and 'categoria' not in validated_data:
+            categoria, _ = Categoria.objects.get_or_create(nome=categoria_nome.strip())
+            validated_data['categoria'] = categoria
+        return validated_data
+
+    def create(self, validated_data):
+        validated_data = self._resolve_categoria(validated_data)
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        validated_data = self._resolve_categoria(validated_data)
+        return super().update(instance, validated_data)
 
 
 class CompraSerializer(serializers.ModelSerializer):

@@ -12,29 +12,49 @@ interface FormProdutoProps {
   onCancel: () => void;
 }
 
-const emptyState: Partial<Produto> = {
+interface FormData {
+  nome: string;
+  categoria_nome: string;
+  quantidade_por_cesta: number;
+  unidade: string;
+  estoque_atual: number;
+  estoque_minimo: number;
+}
+
+const emptyState: FormData = {
   nome: "",
-  categoria: "",
-  quantidade_por_cesta: 0,
-  unidade: "",
+  categoria_nome: "",
+  quantidade_por_cesta: 1,
+  unidade: "un",
   estoque_atual: 0,
   estoque_minimo: 0,
 };
 
 export function FormProduto({ produto, onSubmit, onCancel }: FormProdutoProps) {
-  const [form, setForm] = useState<Partial<Produto>>(emptyState);
+  const [form, setForm] = useState<FormData>(emptyState);
 
   useEffect(() => {
-    setForm(produto ? { ...produto } : emptyState);
+    if (produto) {
+      setForm({
+        nome: produto.nome || "",
+        categoria_nome: produto.categoria?.nome || "",
+        quantidade_por_cesta: Number(produto.quantidade_por_cesta) || 1,
+        unidade: produto.unidade || "un",
+        estoque_atual: Number(produto.estoque_atual) || 0,
+        estoque_minimo: Number(produto.estoque_minimo) || 0,
+      });
+    } else {
+      setForm(emptyState);
+    }
   }, [produto]);
 
-  const handleChange = (field: keyof Produto, value: string | number) => {
+  const handleChange = (field: keyof FormData, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(form);
+    onSubmit(form as Partial<Produto>);
   };
 
   return (
@@ -53,8 +73,8 @@ export function FormProduto({ produto, onSubmit, onCancel }: FormProdutoProps) {
         <Label htmlFor="categoria">Categoria</Label>
         <Input
           id="categoria"
-          value={form.categoria}
-          onChange={(e) => handleChange("categoria", e.target.value)}
+          value={form.categoria_nome}
+          onChange={(e) => handleChange("categoria_nome", e.target.value)}
           placeholder="Ex: Grãos"
           required
         />

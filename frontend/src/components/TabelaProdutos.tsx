@@ -46,7 +46,7 @@ export function TabelaProdutos({ produtos, onEdit, onDelete }: TabelaProdutosPro
               <TableRow key={produto.id}>
                 <TableCell className="font-medium">{produto.nome}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{produto.categoria}</Badge>
+                  <Badge variant="secondary">{produto.categoria?.nome}</Badge>
                 </TableCell>
                 <TableCell>{produto.quantidade_por_cesta}</TableCell>
                 <TableCell>{produto.unidade}</TableCell>

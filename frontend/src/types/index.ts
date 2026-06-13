@@ -1,23 +1,29 @@
+export interface Categoria {
+  id: number;
+  nome: string;
+}
+
 export interface Produto {
   id: number;
   nome: string;
-  categoria: string;
+  categoria: Categoria;
   quantidade_por_cesta: number;
   unidade: string;
   estoque_atual: number;
   estoque_minimo: number;
+  ativo?: boolean;
 }
 
 export interface Compra {
   id: number;
   data: string;
-  produto: number;
+  produto: number | Produto;
   produto_nome?: string;
   marca: string;
   quantidade: number;
   valor_total: string | number;
   valor_unitario: string | number;
-  fornecedor?: number | null;
+  fornecedor?: number | Fornecedor | null;
   fornecedor_nome?: string;
   observacao?: string;
 }
@@ -32,9 +38,9 @@ export interface Fornecedor {
 
 export interface Promocao {
   id: number;
-  produto: number;
+  produto: number | Produto;
   produto_nome?: string;
-  fornecedor?: number | null;
+  fornecedor?: number | Fornecedor | null;
   fornecedor_nome?: string;
   preco: string | number;
   validade: string;
