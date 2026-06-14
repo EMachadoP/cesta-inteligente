@@ -67,14 +67,17 @@ export default function PromocoesPage() {
     e.preventDefault();
     try {
       const payload: Record<string, unknown> = { ...form };
-      if (form.produto != null) {
-        payload.produto_id = typeof form.produto === "object" ? form.produto.id : form.produto;
-        delete payload.produto;
-      }
-      if (form.fornecedor !== undefined) {
-        payload.fornecedor_id = form.fornecedor === null ? null : typeof form.fornecedor === "object" ? form.fornecedor.id : form.fornecedor;
-        delete payload.fornecedor;
-      }
+
+      const getId = (value: number | Produto | Fornecedor | null | undefined) => {
+        if (value == null) return null;
+        return typeof value === "object" ? value.id : value;
+      };
+
+      payload.produto_id = getId(form.produto);
+      payload.fornecedor_id = getId(form.fornecedor);
+      delete payload.produto;
+      delete payload.fornecedor;
+
       await createPromocao(payload as Partial<Promocao>);
       setForm({ validade: new Date().toISOString().split("T")[0] });
       await load();

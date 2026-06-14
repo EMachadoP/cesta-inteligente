@@ -48,14 +48,17 @@ export default function ComprasPage() {
   const handleSubmit = async (data: Partial<Compra>) => {
     try {
       const payload: Record<string, unknown> = { ...data };
-      if (data.produto != null) {
-        payload.produto_id = typeof data.produto === "object" ? data.produto.id : data.produto;
-        delete payload.produto;
-      }
-      if (data.fornecedor !== undefined) {
-        payload.fornecedor_id = data.fornecedor === null ? null : typeof data.fornecedor === "object" ? data.fornecedor.id : data.fornecedor;
-        delete payload.fornecedor;
-      }
+
+      const getId = (value: number | Produto | Fornecedor | null | undefined) => {
+        if (value == null) return null;
+        return typeof value === "object" ? value.id : value;
+      };
+
+      payload.produto_id = getId(data.produto);
+      payload.fornecedor_id = getId(data.fornecedor);
+      delete payload.produto;
+      delete payload.fornecedor;
+
       await createCompra(payload as Partial<Compra>);
       await load();
     } catch (err) {

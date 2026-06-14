@@ -22,8 +22,10 @@ interface FormCompraProps {
 export function FormCompra({ produtos, fornecedores, onSubmit }: FormCompraProps) {
   const [form, setForm] = useState<Partial<Compra>>({
     data: new Date().toISOString().split("T")[0],
+    marca: "",
     quantidade: 1,
     valor_total: 0,
+    observacao: "",
   });
 
   const handleChange = (field: keyof Compra, value: string | number | null | undefined) => {
@@ -46,7 +48,7 @@ export function FormCompra({ produtos, fornecedores, onSubmit }: FormCompraProps
         <div className="space-y-2">
           <Label>Produto</Label>
           <Select
-            value={String(form.produto || "")}
+            value={form.produto != null ? String(form.produto) : ""}
             onValueChange={(value) => handleChange("produto", Number(value))}
             required
           >
@@ -107,7 +109,7 @@ export function FormCompra({ produtos, fornecedores, onSubmit }: FormCompraProps
         <div className="space-y-2">
           <Label>Fornecedor</Label>
           <Select
-            value={form.fornecedor ? String(form.fornecedor) : ""}
+            value={form.fornecedor != null ? String(form.fornecedor) : ""}
             onValueChange={(value) =>
               handleChange("fornecedor", value ? Number(value) : null)
             }
