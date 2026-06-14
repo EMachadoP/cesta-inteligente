@@ -211,8 +211,8 @@ class DashboardViewSet(viewsets.ViewSet):
             'cestas_possiveis_estoque': round(cestas_possiveis or 0, 2),
             'custo_medio_cesta': round(custo_medio_cesta, 2),
             'economia_acumulada': round(economia_acumulada, 2),
-            'produtos_em_falta_count': produtos_em_falta,
-            'promocoes_count': Promocao.objects.count(),
+            'produtos_em_falta': produtos_em_falta,
+            'promocoes_ativas': Promocao.objects.count(),
             'top_oportunidades': ranking_oportunidades(limite=5),
         })
 
