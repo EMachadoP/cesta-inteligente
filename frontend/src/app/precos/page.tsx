@@ -138,7 +138,9 @@ export default function PrecosPage() {
                           <TableCell>{item.mercado || "—"}</TableCell>
                           <TableCell>
                             R${" "}
-                            {Number(item.preco).toFixed(2).replace(".", ",")}
+                            {Number(item.valor_unitario || item.preco || 0)
+                              .toFixed(2)
+                              .replace(".", ",")}
                           </TableCell>
                         </TableRow>
                       ))

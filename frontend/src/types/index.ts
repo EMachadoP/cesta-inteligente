@@ -79,10 +79,11 @@ export interface CustoCestaMes {
 export interface HistoricoPreco {
   id: number;
   data: string;
-  produto: number;
+  produto: number | string;
   marca: string;
   mercado?: string;
-  preco: number;
+  preco?: number;
+  valor_unitario?: number | string;
 }
 
 export interface ComparativoMarca {

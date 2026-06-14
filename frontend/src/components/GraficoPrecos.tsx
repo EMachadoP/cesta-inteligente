@@ -20,7 +20,7 @@ export function GraficoPrecos({ dados }: GraficoPrecosProps) {
   const agrupado = dados.reduce<Record<string, { data: string; [marca: string]: number | string }>>(
     (acc, item) => {
       if (!acc[item.data]) acc[item.data] = { data: item.data };
-      acc[item.data][item.marca] = Number(item.preco);
+      acc[item.data][item.marca] = Number(item.valor_unitario || item.preco || 0);
       return acc;
     },
     {}
