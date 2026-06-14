@@ -152,6 +152,7 @@ class PromocaoSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    menor_historico = serializers.SerializerMethodField()
 
     class Meta:
         model = Promocao
@@ -165,7 +166,14 @@ class PromocaoSerializer(serializers.ModelSerializer):
             'validade',
             'observacao',
             'data_cadastro',
+            'menor_historico',
         ]
+
+    def get_menor_historico(self, obj):
+        menor = obj.produto.menor_preco()
+        if menor is None:
+            return False
+        return float(obj.preco) <= float(menor)
 
 
 class AlertaSerializer(serializers.ModelSerializer):
