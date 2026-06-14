@@ -47,7 +47,16 @@ export default function ComprasPage() {
 
   const handleSubmit = async (data: Partial<Compra>) => {
     try {
-      await createCompra(data);
+      const payload: Record<string, unknown> = { ...data };
+      if (data.produto != null) {
+        payload.produto_id = typeof data.produto === "object" ? data.produto.id : data.produto;
+        delete payload.produto;
+      }
+      if (data.fornecedor !== undefined) {
+        payload.fornecedor_id = data.fornecedor === null ? null : typeof data.fornecedor === "object" ? data.fornecedor.id : data.fornecedor;
+        delete payload.fornecedor;
+      }
+      await createCompra(payload as Partial<Compra>);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao registrar compra");

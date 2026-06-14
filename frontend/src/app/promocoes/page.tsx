@@ -66,7 +66,16 @@ export default function PromocoesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createPromocao(form);
+      const payload: Record<string, unknown> = { ...form };
+      if (form.produto != null) {
+        payload.produto_id = typeof form.produto === "object" ? form.produto.id : form.produto;
+        delete payload.produto;
+      }
+      if (form.fornecedor !== undefined) {
+        payload.fornecedor_id = form.fornecedor === null ? null : typeof form.fornecedor === "object" ? form.fornecedor.id : form.fornecedor;
+        delete payload.fornecedor;
+      }
+      await createPromocao(payload as Partial<Promocao>);
       setForm({ validade: new Date().toISOString().split("T")[0] });
       await load();
     } catch (err) {
