@@ -31,13 +31,15 @@ export function TabelaProdutos({ produtos, onEdit, onDelete }: TabelaProdutosPro
             <TableHead>Unidade</TableHead>
             <TableHead>Estoque Atual</TableHead>
             <TableHead>Estoque Mínimo</TableHead>
+            <TableHead>Preço Médio</TableHead>
+            <TableHead>Menor Preço</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {produtos.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                 Nenhum produto cadastrado.
               </TableCell>
             </TableRow>
@@ -52,6 +54,16 @@ export function TabelaProdutos({ produtos, onEdit, onDelete }: TabelaProdutosPro
                 <TableCell>{produto.unidade}</TableCell>
                 <TableCell>{produto.estoque_atual}</TableCell>
                 <TableCell>{produto.estoque_minimo}</TableCell>
+                <TableCell>
+                  {produto.preco_medio != null
+                    ? `R$ ${Number(produto.preco_medio).toFixed(2).replace(".", ",")}`
+                    : "—"}
+                </TableCell>
+                <TableCell>
+                  {produto.menor_preco != null
+                    ? `R$ ${Number(produto.menor_preco).toFixed(2).replace(".", ",")}`
+                    : "—"}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button

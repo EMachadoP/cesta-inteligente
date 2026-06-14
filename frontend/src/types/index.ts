@@ -12,6 +12,9 @@ export interface Produto {
   estoque_atual: number;
   estoque_minimo: number;
   ativo?: boolean;
+  preco_medio?: number | null;
+  menor_preco?: number | null;
+  consumo_mensal_medio?: number | null;
 }
 
 export interface Compra {
