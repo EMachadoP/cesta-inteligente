@@ -109,16 +109,16 @@ export function FormCompra({ produtos, fornecedores, onSubmit }: FormCompraProps
         <div className="space-y-2">
           <Label>Fornecedor</Label>
           <Select
-            value={form.fornecedor != null ? String(form.fornecedor) : ""}
+            value={form.fornecedor != null ? String(form.fornecedor) : "none"}
             onValueChange={(value) =>
-              handleChange("fornecedor", value ? Number(value) : null)
+              handleChange("fornecedor", value === "none" ? null : Number(value))
             }
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Nenhum</SelectItem>
+              <SelectItem value="none">Nenhum</SelectItem>
               {fornecedores.map((f) => (
                 <SelectItem key={f.id} value={String(f.id)}>
                   {f.nome}

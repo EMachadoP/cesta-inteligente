@@ -137,16 +137,16 @@ export default function PromocoesPage() {
         <div className="space-y-2">
           <Label>Fornecedor</Label>
           <Select
-            value={form.fornecedor ? String(form.fornecedor) : ""}
+            value={form.fornecedor != null ? String(form.fornecedor) : "none"}
             onValueChange={(value) =>
-              setForm({ ...form, fornecedor: value ? Number(value) : null })
+              setForm({ ...form, fornecedor: value === "none" ? null : Number(value) })
             }
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Nenhum</SelectItem>
+              <SelectItem value="none">Nenhum</SelectItem>
               {fornecedores.map((f) => (
                 <SelectItem key={f.id} value={String(f.id)}>
                   {f.nome}
