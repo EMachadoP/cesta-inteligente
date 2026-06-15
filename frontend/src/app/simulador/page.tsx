@@ -1,21 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Simulador } from "@/components/Simulador";
+import { CompraRapidaDialog } from "@/components/CompraRapidaDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, AlertCircle, Calculator } from "lucide-react";
-import { getSimulador } from "@/lib/api";
-import { SimuladorItem } from "@/types";
+import { getProduto, getSimulador } from "@/lib/api";
+import { Produto, SimuladorItem } from "@/types";
 
 export default function SimuladorPage() {
+  const router = useRouter();
   const [cestas, setCestas] = useState<number>(1);
   const [itens, setItens] = useState<SimuladorItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [simulated, setSimulated] = useState(false);
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<SimuladorItem | null>(null);
+  const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
+  const [comprados, setComprados] = useState<number[]>([]);
 
   const handleSimular = async () => {
     try {
@@ -24,11 +32,47 @@ export default function SimuladorPage() {
       const data = await getSimulador(cestas);
       setItens(data.itens);
       setSimulated(true);
+      setComprados([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao simular");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleComprar = async (item: SimuladorItem) => {
+    setSelectedItem(item);
+    try {
+      const produto = await getProduto(item.produto_id);
+      setSelectedProduto(produto);
+    } catch {
+      setSelectedProduto(null);
+    }
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!selectedItem) return;
+    setDialogOpen(false);
+    setComprados((prev) => [...prev, selectedItem.produto_id]);
+    setSelectedItem(null);
+    setSelectedProduto(null);
+    // Recarrega a simulação para refletir estoque atualizado
+    await handleSimular();
+  };
+
+  const handleClose = () => {
+    setDialogOpen(false);
+    setSelectedItem(null);
+    setSelectedProduto(null);
+  };
+
+  const handleFinalizar = () => {
+    setSimulated(false);
+    setItens([]);
+    setComprados([]);
+    setCestas(1);
+    router.push("/compras");
   };
 
   return (
@@ -68,7 +112,22 @@ export default function SimuladorPage() {
         </Button>
       </div>
 
-      {simulated && <Simulador itens={itens} />}
+      {simulated && (
+        <Simulador
+          itens={itens}
+          comprados={comprados}
+          onComprar={handleComprar}
+          onFinalizar={handleFinalizar}
+        />
+      )}
+
+      <CompraRapidaDialog
+        open={dialogOpen}
+        item={selectedItem}
+        produtoAtual={selectedProduto}
+        onClose={handleClose}
+        onSave={handleSave}
+      />
     </div>
   );
 }

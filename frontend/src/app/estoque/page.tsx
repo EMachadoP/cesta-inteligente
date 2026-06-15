@@ -7,23 +7,39 @@ import { Loader2, AlertCircle } from "lucide-react";
 import { getEstoque } from "@/lib/api";
 import { EstoqueItem } from "@/types";
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === "AbortError";
+}
+
 export default function EstoquePage() {
   const [itens, setItens] = useState<EstoqueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function load() {
       try {
-        const data = await getEstoque();
+        const data = await getEstoque(controller.signal);
+        if (controller.signal.aborted) return;
         setItens(data);
+        setError(null);
       } catch (err) {
+        if (controller.signal.aborted || isAbortError(err)) return;
         setError(err instanceof Error ? err.message : "Erro ao carregar estoque");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
+
     load();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (

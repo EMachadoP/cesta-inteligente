@@ -27,6 +27,10 @@ const mockCustoCesta = [
   { mes: "Jun", custo: 140.5 },
 ];
 
+function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === "AbortError";
+}
+
 export default function DashboardPage() {
   const [resumo, setResumo] = useState<DashboardResumo | null>(null);
   const [oportunidades, setOportunidades] = useState<Oportunidade[]>([]);
@@ -34,21 +38,33 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function load() {
       try {
         const [resumoData, oportunidadesData] = await Promise.all([
           getDashboard(),
           getOportunidades(),
         ]);
+        if (controller.signal.aborted) return;
         setResumo(resumoData);
         setOportunidades(oportunidadesData);
+        setError(null);
       } catch (err) {
+        if (controller.signal.aborted || isAbortError(err)) return;
         setError(err instanceof Error ? err.message : "Erro ao carregar dashboard");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
+
     load();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   if (loading) {

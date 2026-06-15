@@ -84,6 +84,9 @@ export interface HistoricoPreco {
   mercado?: string;
   preco?: number;
   valor_unitario?: number | string;
+  quantidade?: number;
+  valor_total?: number | string;
+  fornecedor?: Fornecedor | null;
 }
 
 export interface ComparativoMarca {
@@ -93,12 +96,30 @@ export interface ComparativoMarca {
 }
 
 export interface SimuladorItem {
+  produto_id: number;
   produto: string;
   unidade: string;
   quantidade_por_cesta: number;
   necessario: number;
   em_estoque: number;
   faltara: number;
+  preco_medio?: number;
+  custo_estimado?: number;
+}
+
+export interface UltimaCompra {
+  id: number;
+  data: string;
+  produto: number | string;
+  produto_nome?: string;
+  marca: string;
+  mercado?: string;
+  quantidade: number;
+  valor_unitario: number;
+  valor_total: number;
+  fornecedor?: number | Fornecedor | null;
+  fornecedor_nome?: string;
+  observacao?: string;
 }
 
 export interface SimuladorResponse {

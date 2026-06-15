@@ -15,6 +15,9 @@ import {
 
 async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await apiFetch(path, options);
+  if (response.status === 503 && options.signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
 
   if (!response.ok) {
     let errorData: ApiError = {};
@@ -42,8 +45,8 @@ async function fetchJson<T>(path: string, options: RequestInit = {}): Promise<T>
 }
 
 // Dashboard
-export async function getDashboard(): Promise<DashboardResumo> {
-  return fetchJson<DashboardResumo>("/api/dashboard/resumo");
+export async function getDashboard(signal?: AbortSignal): Promise<DashboardResumo> {
+  return fetchJson<DashboardResumo>("/api/dashboard/resumo", signal ? { signal } : {});
 }
 
 // Produtos
@@ -81,6 +84,17 @@ export async function getHistoricoPrecos(
   );
 }
 
+export async function getUltimaCompra(produtoId: number): Promise<HistoricoPreco | null> {
+  const historico = await getHistoricoPrecos(produtoId);
+  if (historico.length === 0) return null;
+  // historico já vem ordenado por data, id crescente do backend
+  return historico[historico.length - 1];
+}
+
+export async function getProduto(id: number): Promise<Produto> {
+  return fetchJson<Produto>(`/api/produtos/${id}`);
+}
+
 export async function getComparativoMarcas(
   produtoId: number
 ): Promise<ComparativoMarca[]> {
@@ -103,31 +117,37 @@ export async function createCompra(data: Partial<Compra>): Promise<Compra> {
 }
 
 // Estoque
-export async function getEstoque(): Promise<EstoqueItem[]> {
-  return fetchJson<EstoqueItem[]>("/api/estoque");
+export async function getEstoque(signal?: AbortSignal): Promise<EstoqueItem[]> {
+  return fetchJson<EstoqueItem[]>("/api/estoque", signal ? { signal } : {});
 }
 
 // Simulador
 export async function getSimulador(cestas: number): Promise<SimuladorResponse> {
   const data = await fetchJson<
     {
+      produto_id: number;
       produto: string;
       unidade: string;
       quantidade_por_cesta: number;
       necessario: number;
       em_estoque: number;
       falta_comprar: number;
+      preco_medio?: number;
+      custo_estimado?: number;
     }[]
   >(`/api/simulador?cestas=${cestas}`);
   return {
     cestas,
     itens: data.map((item) => ({
+      produto_id: item.produto_id,
       produto: item.produto,
       unidade: item.unidade,
       quantidade_por_cesta: item.quantidade_por_cesta,
       necessario: item.necessario,
       em_estoque: item.em_estoque,
       faltara: item.falta_comprar,
+      preco_medio: item.preco_medio,
+      custo_estimado: item.custo_estimado,
     })),
   };
 }
@@ -175,6 +195,6 @@ export async function deleteFornecedor(id: number): Promise<void> {
 }
 
 // Inteligência
-export async function getOportunidades(): Promise<Oportunidade[]> {
-  return fetchJson<Oportunidade[]>("/api/inteligencia/oportunidades");
+export async function getOportunidades(signal?: AbortSignal): Promise<Oportunidade[]> {
+  return fetchJson<Oportunidade[]>("/api/inteligencia/oportunidades", signal ? { signal } : {});
 }

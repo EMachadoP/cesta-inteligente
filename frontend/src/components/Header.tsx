@@ -79,6 +79,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "block rounded-lg px-3 py-2 text-sm font-medium transition-colors",

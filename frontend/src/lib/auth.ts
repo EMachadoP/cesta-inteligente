@@ -70,6 +70,20 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
+function redirectToLogin() {
+  if (typeof window === "undefined") return;
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+}
+
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 500;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function apiFetch(
   path: string,
   options: RequestInit = {}
@@ -90,16 +104,39 @@ export async function apiFetch(
   }
 
   const url = path.startsWith("http") ? path : `${API_URL}${path}`;
-  const res = await fetch(url, { ...options, headers });
 
-  if (res.status === 401) {
-    clearTokens();
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const res = await fetch(url, { ...options, headers });
+
+      if (res.status === 401) {
+        clearTokens();
+        redirectToLogin();
+      }
+
+      return res;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        // Re-throw abort errors so callers can ignore them on unmount.
+        throw err;
+      }
+      if (attempt < MAX_RETRIES) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      // Return a synthetic response so callers can handle it uniformly.
+      return new Response(
+        JSON.stringify({ detail: "Servidor indisponível. Verifique se o backend está rodando." }),
+        { status: 503, headers: { "Content-Type": "application/json" } }
+      );
     }
   }
 
-  return res;
+  // Should never reach here, but satisfies TypeScript.
+  return new Response(
+    JSON.stringify({ detail: "Erro inesperado na comunicação com o servidor." }),
+    { status: 503, headers: { "Content-Type": "application/json" } }
+  );
 }
 
 export async function login(

@@ -131,10 +131,11 @@ class CompraSerializer(serializers.ModelSerializer):
 
 class CompraHistoricoSerializer(serializers.ModelSerializer):
     produto = serializers.CharField(source='produto.nome', read_only=True)
+    fornecedor = FornecedorSerializer(read_only=True)
 
     class Meta:
         model = Compra
-        fields = ['id', 'data', 'produto', 'marca', 'quantidade', 'valor_total', 'valor_unitario']
+        fields = ['id', 'data', 'produto', 'marca', 'quantidade', 'valor_total', 'valor_unitario', 'fornecedor']
 
 
 class PromocaoSerializer(serializers.ModelSerializer):
