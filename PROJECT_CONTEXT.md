@@ -154,7 +154,11 @@ Processos antigos do Node/Python podem ficar presos. Use `netstat -ano | grep :3
 
 ### Deploy no Railway retorna 502
 **Causa raiz confirmada (jun/2026)**: o `Procfile` rodava `gunicorn cesta_inteligente.wsgi:application` **sem `--bind 0.0.0.0:$PORT`**. O gunicorn faz bind padrão em `127.0.0.1:8000` (loopback), mas o Railway injeta seu próprio `$PORT` e roteia para `0.0.0.0:$PORT` — o proxy de borda não alcança o app → **502**.
-**Correção**: `Procfile` passou a usar `--bind 0.0.0.0:$PORT` (commit de jun/2026). O start também encadeia `migrate` + `criar_usuario_demo` + `collectstatic`, tornando o deploy auto-suficiente.
+**Correção (2 partes, jun/2026)**:
+1. `Procfile` passou a usar `--bind 0.0.0.0:$PORT` (o `$PORT` do Railway era 8080). O start também encadeia `migrate` + `criar_usuario_demo` + `collectstatic`, tornando o deploy auto-suficiente.
+2. No Railway → **Settings → Networking**, o domínio público `cesta-inteligente-production.up.railway.app` estava mapeado para a **porta 8000**, mas o gunicorn ouvia na **8080**. Ajustado o mapeamento para **8080**. Backend confirmado no ar (`/admin/` → 302, `POST /api/auth/login` → 400).
+
+**Atenção**: a senha do superusuário `admin/admin123` ficou exposta nos logs de deploy — trocar via `/admin/` assim que possível.
 
 **Outras causas possíveis de 502 (se persistir após o bind)**:
 - **Root Directory** do serviço não configurado como `backend`.
