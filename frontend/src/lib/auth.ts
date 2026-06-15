@@ -186,3 +186,43 @@ export async function getCurrentUser(): Promise<User | null> {
     return null;
   }
 }
+
+function extractFirstError(err: Record<string, unknown>): string | null {
+  for (const value of Object.values(err)) {
+    if (Array.isArray(value) && value.length > 0) return String(value[0]);
+    if (typeof value === "string") return value;
+  }
+  return null;
+}
+
+export async function register(
+  username: string,
+  email: string,
+  password: string,
+  inviteCode: string
+): Promise<Tokens> {
+  const res = await fetch(`${API_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+      invite_code: inviteCode,
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg =
+      (err as { detail?: string }).detail ||
+      extractFirstError(err as Record<string, unknown>) ||
+      "Erro ao criar conta";
+    throw new Error(msg);
+  }
+
+  const data = await res.json();
+  const tokens: Tokens = { access: data.access, refresh: data.refresh };
+  saveTokens(tokens);
+  return tokens;
+}
