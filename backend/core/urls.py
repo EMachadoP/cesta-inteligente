@@ -16,6 +16,7 @@ from core.views import (
     ProdutoViewSet,
     PromocaoViewSet,
     RefreshView,
+    RegisterView,
     SimuladorViewSet,
     logout_view,
     me_view,
@@ -36,6 +37,7 @@ router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 urlpatterns = [
     path('', include(router.urls)),
     path('auth/login', LoginView.as_view(), name='login'),
+    path('auth/register', RegisterView.as_view(), name='register'),
     path('auth/refresh', RefreshView.as_view(), name='refresh'),
     path('auth/logout', logout_view, name='logout'),
     path('auth/me', me_view, name='me'),

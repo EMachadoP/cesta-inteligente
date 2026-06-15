@@ -1,6 +1,9 @@
 """
 Serializers da API do Cesta Inteligente.
 """
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from core.models import (
@@ -256,3 +259,34 @@ class EstoqueSerializer(serializers.ModelSerializer):
         if consumo <= 0:
             return None
         return round(float(obj.estoque_atual) / consumo, 2)
+
+
+class RegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    invite_code = serializers.CharField(write_only=True)
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Usuário já existe.")
+        return value
+
+    def validate_password(self, value):
+        validate_password(value)
+        return value
+
+    def validate_invite_code(self, value):
+        expected = settings.REGISTRATION_INVITE_CODE
+        if not expected:
+            raise serializers.ValidationError("Cadastro desabilitado no momento.")
+        if value != expected:
+            raise serializers.ValidationError("Código de convite inválido.")
+        return value
+
+    def create(self, validated_data):
+        return User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            password=validated_data["password"],
+        )
