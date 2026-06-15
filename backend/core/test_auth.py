@@ -46,3 +46,11 @@ class RegisterEndpointTests(TestCase):
         res = self.client.post(self.url, self.payload, format="json")
         self.assertEqual(res.status_code, 400)
         self.assertFalse(User.objects.filter(username="novo").exists())
+
+    def test_username_duplicado_com_convite_invalido_nao_revela(self):
+        User.objects.create_user(username="novo", password="x")
+        payload = {**self.payload, "invite_code": "ERRADO"}
+        res = self.client.post(self.url, payload, format="json")
+        self.assertEqual(res.status_code, 400)
+        self.assertNotIn("username", res.data)
+        self.assertIn("invite_code", res.data)

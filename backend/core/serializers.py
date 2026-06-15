@@ -267,11 +267,6 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     invite_code = serializers.CharField(write_only=True)
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError("Usuário já existe.")
-        return value
-
     def validate_password(self, value):
         validate_password(value)
         return value
@@ -283,6 +278,13 @@ class RegisterSerializer(serializers.Serializer):
         if value != expected:
             raise serializers.ValidationError("Código de convite inválido.")
         return value
+
+    def validate(self, attrs):
+        if User.objects.filter(username=attrs["username"]).exists():
+            raise serializers.ValidationError(
+                {"username": "Usuário já existe."}
+            )
+        return attrs
 
     def create(self, validated_data):
         return User.objects.create_user(
