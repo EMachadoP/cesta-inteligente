@@ -33,6 +33,10 @@ Sistema de gestão de cestas básicas que transforma o controle de estoque em um
 - Sistema protegido por JWT (SimpleJWT).
 - Usuário demo criado automaticamente: `admin` / `admin123`.
 - Telas privadas redirecionam para `/login` quando não autenticado.
+- **Cadastro de conta** (jun/2026): página `/register` + `POST /api/auth/register`. Protegido por **código de convite** (`REGISTRATION_INVITE_CODE` no Railway); se a var estiver vazia, o cadastro fica desabilitado (fail-safe). Cria usuário **comum** (sem acesso ao `/admin/`) e faz auto-login. Base de dados é compartilhada entre todos os usuários.
+- **Esqueci a senha**: página `/forgot-password` é estática e orienta a contatar o admin. O reset é **manual** pelo admin via `/admin/` (não há e-mail configurado).
+- A tela de login não vem mais com credenciais pré-preenchidas nem exibe a dica demo; tem links "Criar conta" e "Esqueci minha senha".
+- Rotas públicas (sem login): `/login`, `/register`, `/forgot-password`.
 
 ## Como Executar
 
@@ -93,6 +97,7 @@ Resumo atual do banco após importação da planilha:
 
 ## Endpoints da API
 ### Autenticação
+- `POST /api/auth/register` → cria usuário (exige `invite_code`) e retorna tokens access/refresh + user
 - `POST /api/auth/login` → tokens access/refresh
 - `POST /api/auth/refresh`
 - `POST /api/auth/logout`
