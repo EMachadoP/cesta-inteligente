@@ -12,11 +12,12 @@ Sistema de gestão de cestas básicas que transforma o controle de estoque em um
   - Frontend: `http://localhost:3000`
 - **Ambiente de produção (testes)**:
   - Backend: `https://cesta-inteligente-production.up.railway.app` (projeto Railway `joyful-enchantment`, serviço `cesta-inteligente`)
-  - Frontend (URL estável de produção — **link para divulgar**): `https://frontend-tau-eight-27.vercel.app`
-    - Aliases equivalentes: `frontend-eldons-projects-3194802d.vercel.app`, `frontend-emachadop-eldons-projects-3194802d.vercel.app`
-    - ⚠️ URLs com hash (`frontend-<hash>-...vercel.app`) são por-deploy e mudam; não usar.
+  - Frontend (URL estável de produção — **link para divulgar**): `https://cesta-inteligente.vercel.app`
+    - Projeto Vercel **dedicado** `cesta-inteligente` (criado jun/2026). Aliases equivalentes: `cesta-inteligente-eldons-projects-3194802d.vercel.app`, `cesta-inteligente-emachadop-eldons-projects-3194802d.vercel.app`.
+    - ⚠️ O projeto Vercel antigo `frontend` (URL `frontend-tau-eight-27.vercel.app`) era compartilhado e foi sobrescrito pelo app do ERP "Cost Intelligence" — **não usar**. Deploy via `vercel --prod` na pasta `frontend/` (CLI, sem conexão git).
+    - Env na Vercel: `NEXT_PUBLIC_API_URL=https://cesta-inteligente-production.up.railway.app` (Production).
   - Banco de dados: PostgreSQL hospedado no Railway
-  - CORS: `CORS_ALLOWED_ORIGINS` no Railway inclui os 3 aliases estáveis da Vercel + localhost.
+  - CORS: `CORS_ALLOWED_ORIGINS` no Railway inclui os 3 aliases estáveis de `cesta-inteligente.vercel.app` + localhost.
   - Repositório: `https://github.com/EMachadoP/cesta-inteligente`
 
 ## Stack
