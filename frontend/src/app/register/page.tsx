@@ -10,10 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Package, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
-  const { login } = useAuth();
+export default function RegisterPage() {
+  const { register } = useAuth();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -22,9 +24,9 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      await login(username, password);
+      await register(username, email, password, inviteCode);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+      setError(err instanceof Error ? err.message : "Erro ao criar conta");
     } finally {
       setLoading(false);
     }
@@ -40,10 +42,10 @@ export default function LoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-primary">
-            Cesta Inteligente
+            Criar conta
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Faça login para acessar o sistema
+            Preencha os dados para acessar o sistema
           </p>
         </CardHeader>
         <CardContent>
@@ -59,7 +61,16 @@ export default function LoginPage() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -70,7 +81,16 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Mínimo 8 caracteres"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="inviteCode">Código de convite</Label>
+              <Input
+                id="inviteCode"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value)}
                 required
               />
             </div>
@@ -79,28 +99,16 @@ export default function LoginPage() {
               className="w-full bg-primary hover:bg-primary/90"
               disabled={loading}
             >
-              {loading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              Entrar
+              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Criar conta
             </Button>
           </form>
-          <div className="mt-4 space-y-2 text-center text-sm">
-            <p className="text-muted-foreground">
-              Não tem conta?{" "}
-              <Link href="/register" className="text-primary hover:underline">
-                Criar conta
-              </Link>
-            </p>
-            <p>
-              <Link
-                href="/forgot-password"
-                className="text-muted-foreground hover:underline"
-              >
-                Esqueci minha senha
-              </Link>
-            </p>
-          </div>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Já tem conta?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Entrar
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>

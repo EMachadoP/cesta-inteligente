@@ -12,6 +12,7 @@ import {
   User,
   login as authLogin,
   logout as authLogout,
+  register as authRegister,
   getAccessToken,
   getCurrentUser,
 } from "@/lib/auth";
@@ -20,12 +21,18 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+    inviteCode: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const PUBLIC_ROUTES = ["/login"];
+const PUBLIC_ROUTES = ["/login", "/register", "/forgot-password"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -55,13 +62,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.replace("/login");
     }
 
-    if (isAuthenticated && pathname === "/login") {
+    if (isAuthenticated && PUBLIC_ROUTES.includes(pathname)) {
       router.replace("/");
     }
   }, [loading, pathname, router]);
 
   async function login(username: string, password: string) {
     await authLogin(username, password);
+    const current = await getCurrentUser();
+    setUser(current);
+    router.replace("/");
+  }
+
+  async function register(
+    username: string,
+    email: string,
+    password: string,
+    inviteCode: string
+  ) {
+    await authRegister(username, email, password, inviteCode);
     const current = await getCurrentUser();
     setUser(current);
     router.replace("/");
@@ -74,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
