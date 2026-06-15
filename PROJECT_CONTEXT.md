@@ -10,11 +10,17 @@ Sistema de gestão de cestas básicas que transforma o controle de estoque em um
 - **Servidores de desenvolvimento**:
   - Backend: `http://localhost:8000`
   - Frontend: `http://localhost:3000`
+- **Ambiente de produção (testes)**:
+  - Backend: `https://cesta-inteligente-production.up.railway.app`
+  - Frontend: `https://frontend-lsma3d257-eldons-projects-3194802d.vercel.app`
+  - Banco de dados: PostgreSQL hospedado no Railway
+  - Repositório: `https://github.com/EMachadoP/cesta-inteligente`
 
 ## Stack
 - Backend: Django 5.2.15 + Django REST Framework + djangorestframework-simplejwt
 - Frontend: Next.js 14.2.18 + React + Tailwind CSS + shadcn/ui
-- Banco: SQLite (`backend/db.sqlite3`)
+- Banco local: SQLite (`backend/db.sqlite3`)
+- Banco produção: PostgreSQL (Railway)
 - IA: Google Gemini API (`google-genai`) com fallback quando `GEMINI_API_KEY` não está configurada
 - Python: 3.13.7
 - Node: v22.20.0 / npm 11.15.0
@@ -75,7 +81,7 @@ Resumo atual do banco após importação da planilha:
 4. ✅ Comparativo de Marcas — menor preço e preço médio
 5. ✅ Estoque — semáforo visual (acima/atenção/urgente)
 6. ✅ Formação da Cesta — montagem mensal automática
-7. ✅ Simulador — necessário / em estoque / falta comprar
+7. ✅ Simulador — necessário / em estoque / falta comprar, com fluxo de **programação de compra** (botão Comprar, último preço, comparativo, substituição/acréscimo de produto e finalização)
 8. ✅ Promoções — cadastro manual com alerta de menor preço histórico
 9. ✅ Inteligência de Compras — índice de oportunidade 0-100 + recomendação
 10. ✅ Fornecedores — CRUD simples
@@ -104,7 +110,35 @@ Resumo atual do banco após importação da planilha:
 - `GET /api/inteligencia/recomendacao/`
 - `GET /api/dashboard/resumo/`
 
+## Deploy
+
+### Railway (backend + PostgreSQL)
+1. Criar projeto no Railway a partir do repositório GitHub.
+2. Configurar **Root Directory** como `backend`.
+3. Adicionar serviço **PostgreSQL** (o Railway cria `DATABASE_URL` automaticamente).
+4. Configurar variáveis de ambiente:
+   - `SECRET_KEY` — chave segura gerada
+   - `DEBUG=False`
+   - `ALLOWED_HOSTS=*`
+   - `CORS_ALLOWED_ORIGINS=https://<url-do-frontend>.vercel.app`
+5. Rodar no Console do Railway:
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+
+### Vercel (frontend)
+1. Criar projeto a partir do diretório `frontend/`.
+2. Configurar variável de ambiente:
+   - `NEXT_PUBLIC_API_URL=https://<url-do-backend>.railway.app`
+3. O `next.config.js` desativa o proxy local quando `NEXT_PUBLIC_API_URL` está definido.
+
 ## Problemas Conhecidos e Soluções
+
+### VS Code — "Servidor indisponível" no preview embutido
+**Causa**: o navegador embutido do VS Code (Electron) pode ter problemas de rede/DNS com `localhost`.  
+**Solução**: abra o sistema no **Chrome** ou **Edge** externo, acessando `http://localhost:3000`.
+
 
 ### Erro `Objects are not valid as a React child`
 **Causa**: serializers do backend retornam objetos aninhados para `categoria`, `produto` e `fornecedor`, mas o frontend renderizava esses objetos diretamente.  
@@ -119,7 +153,18 @@ Resumo atual do banco após importação da planilha:
 4. No navegador, pressione `Ctrl+F5` para limpar cache
 
 ### Portas 3000/8000 ocupadas
-Processos antigos do Node/Python podem ficar presos. Use `netstat -ano | grep :3000` para identificar o PID e `taskkill //PID <PID> //F` para finalizar.
+Processos antigos do Node/Python podem ficar presos. Use `netstat -ano | grep :3000` para identificar o PID e `taskkill //PID <PID> //F` para finalizar. Também funciona `npx kill-port 3000`.
+
+### Deploy no Railway retorna 502
+**Causas comuns**:
+- `Procfile` ou `requirements.txt` não encontrados na raiz do serviço.
+- Erro no startup do Gunicorn ou nas variáveis de ambiente.
+- Banco PostgreSQL não vinculado (`DATABASE_URL` ausente).
+
+**Solução**:
+1. Verifique no Railway se **Root Directory** está configurado como `backend`.
+2. Confira os logs de deploy no dashboard do Railway.
+3. Certifique-se de que o PostgreSQL foi adicionado ao projeto e que `DATABASE_URL` está definida.
 
 ## Próximos Passos (Fases 2 e 3)
 - Scraping de preços de supermercados (Playwright/Apify)
