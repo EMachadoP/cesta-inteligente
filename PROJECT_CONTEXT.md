@@ -121,11 +121,8 @@ Resumo atual do banco após importação da planilha:
    - `DEBUG=False`
    - `ALLOWED_HOSTS=*`
    - `CORS_ALLOWED_ORIGINS=https://<url-do-frontend>.vercel.app`
-5. Rodar no Console do Railway:
-   ```bash
-   python manage.py migrate
-   python manage.py createsuperuser
-   ```
+5. **Não é necessário rodar nada no Console.** O `Procfile` executa automaticamente, a cada deploy:
+   `migrate` → `criar_usuario_demo` (cria/atualiza superusuário `admin`/`admin123`) → `collectstatic` → `gunicorn` com `--bind 0.0.0.0:$PORT`.
 
 ### Vercel (frontend)
 1. Criar projeto a partir do diretório `frontend/`.
@@ -156,15 +153,13 @@ Resumo atual do banco após importação da planilha:
 Processos antigos do Node/Python podem ficar presos. Use `netstat -ano | grep :3000` para identificar o PID e `taskkill //PID <PID> //F` para finalizar. Também funciona `npx kill-port 3000`.
 
 ### Deploy no Railway retorna 502
-**Causas comuns**:
-- `Procfile` ou `requirements.txt` não encontrados na raiz do serviço.
-- Erro no startup do Gunicorn ou nas variáveis de ambiente.
-- Banco PostgreSQL não vinculado (`DATABASE_URL` ausente).
+**Causa raiz confirmada (jun/2026)**: o `Procfile` rodava `gunicorn cesta_inteligente.wsgi:application` **sem `--bind 0.0.0.0:$PORT`**. O gunicorn faz bind padrão em `127.0.0.1:8000` (loopback), mas o Railway injeta seu próprio `$PORT` e roteia para `0.0.0.0:$PORT` — o proxy de borda não alcança o app → **502**.
+**Correção**: `Procfile` passou a usar `--bind 0.0.0.0:$PORT` (commit de jun/2026). O start também encadeia `migrate` + `criar_usuario_demo` + `collectstatic`, tornando o deploy auto-suficiente.
 
-**Solução**:
-1. Verifique no Railway se **Root Directory** está configurado como `backend`.
-2. Confira os logs de deploy no dashboard do Railway.
-3. Certifique-se de que o PostgreSQL foi adicionado ao projeto e que `DATABASE_URL` está definida.
+**Outras causas possíveis de 502 (se persistir após o bind)**:
+- **Root Directory** do serviço não configurado como `backend`.
+- `DATABASE_URL` ausente (PostgreSQL não vinculado) → `migrate` falha no start → 502 (o traceback aparece nos logs de deploy).
+- Erro no startup do Gunicorn (ver logs de deploy no dashboard do Railway).
 
 ## Próximos Passos (Fases 2 e 3)
 - Scraping de preços de supermercados (Playwright/Apify)

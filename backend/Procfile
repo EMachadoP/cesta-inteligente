@@ -1,1 +1,1 @@
-web: gunicorn cesta_inteligente.wsgi:application
+web: python manage.py migrate --noinput && python manage.py criar_usuario_demo && python manage.py collectstatic --noinput && gunicorn cesta_inteligente.wsgi:application --bind 0.0.0.0:$PORT --log-file -
